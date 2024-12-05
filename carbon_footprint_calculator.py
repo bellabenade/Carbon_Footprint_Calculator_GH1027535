@@ -1,11 +1,10 @@
 import streamlit as st
 
-
 st.title('Carbon Footprint Calculator')
 st.write('Gabriella Benade')
 st.write('GH1027535')
 
-st.image(".venv/Carbon_Footprint.png")
+# st.image(".venv/Carbon_Footprint.png")
 # https://si.solargaps.com/what-is-your-carbon-footprint-size/
 
 st.header('Welcome to our Carbon Footprint Calculator!')
