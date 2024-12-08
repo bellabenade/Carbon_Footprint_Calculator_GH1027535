@@ -10,6 +10,7 @@ def connection_creation():
     connection = sqlite3.connect('company_clients.db')
     return connection
 
+# Creation of tables
 def user_table():
     connection = connection_creation()
     cursor = connection.cursor()
@@ -19,12 +20,37 @@ def user_table():
     connection.commit()
     connection.close()
 
+def carbon_table():
+    connection = connection_creation()
+    cursor = connection.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS clients (
+                        username TEXT,
+                        electricity REAL,
+                        nat_gas REAL,
+                        fuel REAL,
+                        energy REAL,
+                        waste_generated REAL,
+                        waste_recycled REAL,
+                        waste REAL,
+                        travel_km REAL,
+                        fuel_efficiency REAL,
+                        travel REAL,
+                        carbon_footprint REAL,
+                        FOREIGN KEY(username) REFERENCES users(username)''')
+    connection.commit()
+    connection.close()
+
+
+# functions to create entries
 def add_user(username, password):
     connection = connection_creation()
     cursor = connection.cursor()
     cursor.execute('INSERT INTO users (username, password) VALUES (?, ?)', (username, password))
     connection.commit()
     connection.close()
+
+#def add_info():
+
 
 def get_user(username):
     connection = connection_creation()

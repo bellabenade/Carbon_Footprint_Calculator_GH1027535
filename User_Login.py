@@ -1,51 +1,50 @@
+# gabriella_benade
+# 1234
+
 import streamlit as st
+from database import get_user, add_user, delete_user
 
-# Initialize user data storage
-if "users" not in st.session_state:
-    st.session_state.users = {}
-
-# Signup function
-def signup(username, password):
-    if username in st.session_state.users:
-        return False, "Username already exists!"
+# validate users credentials:
+def user_validation(username, password):
+    user = get_user(username)
+    if user and user[1] == password:
+        return True
     else:
-        st.session_state.users[username] = password
-        return True, "Signup successful!"
+        return False
 
-# Login function
-def login(username, password):
-    if username in st.session_state.users:
-        if st.session_state.users[username] == password:
-            return True, "Login successful!"
+# signup function
+def signup():
+    st.subheader('Create a profile:')
+    new_user = st.text_input('Username:')
+    new_password = st.text_input('Password:', type = 'password')
+    if st.button('SIGNUP'):
+        if get_user(new_user):
+            st.error('This username already exists! Please go to login.')
         else:
-            return False, "Incorrect password!"
-    else:
-        return False, "Username does not exist!"
+            add_user(new_user, new_password)
+            st.success('Signup successful! Please go to the login page and login with your new credentials.')
 
-# User Interface
-st.title("Carbon Footprint Calculator")
+# login function
+def login():
+    st.subheader('Log into your account:')
+    username = st.text_input('Username:')
+    password = st.text_input('Password:', type = "password")
+    if st.button('LOGIN'):
+        if user_validation(username, password):
+           st.session_state.logged_in = True
+           print('You have successfully logged in!')
+        else:
+            st.error('Invalid username or password!')
 
-menu = ["Login", "Signup"]
-choice = st.sidebar.selectbox("What are you doing?", menu)
-
-if choice == "Signup":
-    st.subheader("Are you a new member?")
-    new_user = st.text_input("Username")
-    new_password = st.text_input("Password", type="password")
-    if st.button("Signup"):
-        success, message = signup(new_user, new_password)
-        st.success(message) if success else st.error(message)
-
-elif choice == "Login":
-    st.subheader("Login to your account")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    if st.button("Login"):
-        success, message = login(username, password)
-        st.success(message) if success else st.error(message)
-
-    if success:
-        st.write(f"Welcome, {username}!")
-
-st.write("Registered Users:")
-st.write(st.session_state.users)
+# delete function
+def delete():
+    st.subheader("We're so sorry to see you go!")
+    st.text('Please enter your credentials to delete your profile from our system:')
+    del_user = st.text_input('Username:')
+    del_password = st.text_input('Password:', type = "password")
+    if st.button('DELETE'):
+        if user_validation(del_user, del_password):
+            delete_user(del_user)
+            st.success('Your account has been deleted!')
+        else:
+            st.error('Username or password is invalid.')

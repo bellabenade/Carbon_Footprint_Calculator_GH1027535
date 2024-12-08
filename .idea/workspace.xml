@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="34f90a87-0e03-4d26-b776-df90307c96a0" name="Changes" comment="Initial code (version 1)&#10;Basic website setup with inputs and visuals" />
+    <list default="true" id="34f90a87-0e03-4d26-b776-df90307c96a0" name="Changes" comment="Database creation">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/User_Login.py" beforeDir="false" afterPath="$PROJECT_DIR$/User_Login.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/carbon_footprint_calculator.py" beforeDir="false" afterPath="$PROJECT_DIR$/carbon_footprint_calculator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/company_clients.db" beforeDir="false" afterPath="$PROJECT_DIR$/company_clients.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/database.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -44,6 +50,9 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Python.User_Login.executor": "Run",
+    "Python.carbon_footprint_calculator.executor": "Run",
+    "Python.database.executor": "Run",
+    "Python.database_view.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "master",
