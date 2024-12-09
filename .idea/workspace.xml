@@ -5,11 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="34f90a87-0e03-4d26-b776-df90307c96a0" name="Changes" comment="Database creation">
+      <change afterPath="$PROJECT_DIR$/carbon_footprint.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/User_Login.py" beforeDir="false" afterPath="$PROJECT_DIR$/User_Login.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/carbon_footprint_calculator.py" beforeDir="false" afterPath="$PROJECT_DIR$/carbon_footprint_calculator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/company_clients.db" beforeDir="false" afterPath="$PROJECT_DIR$/company_clients.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pages.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,6 +55,7 @@
     "Python.carbon_footprint_calculator.executor": "Run",
     "Python.database.executor": "Run",
     "Python.database_view.executor": "Run",
+    "Python.pages.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "master",
@@ -60,6 +63,11 @@
     "last_opened_file_path": "C:/Users/user/Documents/GitHub/Carbon_Footprint_Calculator_GH1027535"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\user\Documents\GitHub\Carbon_Footprint_Calculator_GH1027535" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>

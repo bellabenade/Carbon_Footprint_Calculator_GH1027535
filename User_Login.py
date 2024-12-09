@@ -15,14 +15,21 @@ def user_validation(username, password):
 # signup function
 def signup():
     st.subheader('Create a profile:')
-    new_user = st.text_input('Username:')
-    new_password = st.text_input('Password:', type = 'password')
-    if st.button('SIGNUP'):
-        if get_user(new_user):
-            st.error('This username already exists! Please go to login.')
-        else:
-            add_user(new_user, new_password)
-            st.success('Signup successful! Please go to the login page and login with your new credentials.')
+
+    st.subheader('Welcome to our Carbon Footprint Calculator!')
+    st.text('Thank you so much for participating in our carbon footprint survey. We hope that this analysis is just as useful to you as it is to us.')
+    st.write('_Please note that this information will be made public to our other existing clients. Please check the box to agree to these terms:_')
+    check = st.checkbox('AGREE', value=False)
+    if check:
+        new_user = st.text_input('Username:')
+        new_password = st.text_input('Password:', type='password')
+        if st.button('SIGNUP'):
+            if get_user(new_user):
+                st.error('This username already exists! Please go to login.')
+            else:
+                add_user(new_user, new_password)
+                st.success('Signup successful! Please go to the login page and login with your new credentials.')
+
 
 # login function
 def login():
@@ -32,6 +39,7 @@ def login():
     if st.button('LOGIN'):
         if user_validation(username, password):
            st.session_state.logged_in = True
+           st.session_state.username = username
            print('You have successfully logged in!')
         else:
             st.error('Invalid username or password!')
