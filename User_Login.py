@@ -1,5 +1,6 @@
 # gabriella_benade
 # 1234
+# pip freeze > requirements.txt
 
 import streamlit as st
 from database import get_user, add_user, delete_user
@@ -38,9 +39,9 @@ def login():
     password = st.text_input('Password:', type = "password")
     if st.button('LOGIN'):
         if user_validation(username, password):
-           st.session_state.logged_in = True
-           st.session_state.username = username
-           print('You have successfully logged in!')
+            st.session_state.logged_in = True
+            st.session_state.username = username
+            print('You have successfully logged in!')
         else:
             st.error('Invalid username or password!')
 

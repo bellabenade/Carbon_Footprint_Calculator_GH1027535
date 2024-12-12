@@ -1,6 +1,12 @@
 import streamlit as st
 from pages import login_page, profile
 
-login_page()
+st.title('Carbon Footprint Calculator')
+
 if st.session_state.logged_in:
     profile()
+else:
+    login_page()
+
+
+
