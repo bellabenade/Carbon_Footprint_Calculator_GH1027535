@@ -2,6 +2,9 @@
 # how sqlite3 works: https://www.youtube.com/watch?v=girsuXz0yA8
 
 import sqlite3
+import plotly.express as pe
+import plotly.graph_objects as go
+import pandas as pd
 import streamlit as st
 
 #connection to database and cursor
@@ -111,7 +114,7 @@ def calculate_values():
 
     for i in result:
         username, cur_date, energy, waste, travel = i
-        carbon_footprint = float(energy) + float(waste) + float(travel)
+        carbon_footprint = int(float(energy) + float(waste) + float(travel))
         cursor.execute('''INSERT OR REPLACE INTO calculated (username, cur_date, energy, waste, travel, carbon_footprint)
                             VALUES (?, ?, ?, ?, ?, ?)''', (username, cur_date, energy, waste, travel, carbon_footprint))
     connection.commit()
@@ -132,10 +135,127 @@ def herpa_derpa():
                     LIMIT 1''')
     carbon_foot = cursor.fetchone()[0]
     connection.close()
-    print('=============================')
-    print(carbon_foot)
-    print('==============================')
     return carbon_foot
+
+def pie_chart():
+    connection = connection_creation()
+    cursor = connection.cursor()
+    cursor.execute(f'''SELECT energy, waste, travel
+                    FROM calculated
+                    WHERE username = '{st.session_state.username}'
+                    ORDER BY cur_date DESC
+                    LIMIT 1''')
+    values1 = cursor.fetchall()
+    connection.close()
+
+    val1_table = pd.DataFrame(values1, columns= ['energy', 'waste', 'travel'])
+    val1_table_values = val1_table[['energy', 'waste', 'travel']].sum()
+
+    pie = pe.pie(
+        names = ['Energy', 'Waste', 'Travel'],
+        values = [val1_table_values['energy'], val1_table_values['waste'], val1_table_values['travel']],
+        title = 'My consumption this month:')
+
+    st.plotly_chart(pie)
+
+def energy_bar_chart():
+    connection = connection_creation()
+    cursor = connection.cursor()
+    cursor.execute(f'''SELECT cur_date, energy
+                    FROM calculated
+                    WHERE username = '{st.session_state.username}'
+                    ORDER BY cur_date DESC
+                    LIMIT 12''')
+    values2 = cursor.fetchall()
+    connection.close()
+
+    val2_table = pd.DataFrame(values2, columns=['cur_date', 'energy'])
+
+    bar2 = go.Bar(x = val2_table['cur_date'], y = val2_table['energy'], name = 'Energy Consumption')
+    line2 = go.Scatter(x = val2_table['cur_date'], y = val2_table['energy'], mode = 'lines+markers', name = 'Trend')
+
+    trend2 = go.Figure()
+    trend2.add_trace(bar2)
+    trend2.add_trace(line2)
+
+    trend2.update_layout(title = 'Energy Consumption Over The Last Year',
+                        xaxis_title = 'Date',
+                        yaxis_title = 'Energy Consumption')
+
+    st.plotly_chart(trend2)
+
+def waste_bar_chart():
+    connection = connection_creation()
+    cursor = connection.cursor()
+    cursor.execute(f'''SELECT cur_date, waste
+                    FROM calculated
+                    WHERE username = '{st.session_state.username}'
+                    ORDER BY cur_date DESC
+                    LIMIT 12''')
+    values3 = cursor.fetchall()
+    connection.close()
+
+    val3_table = pd.DataFrame(values3, columns=['cur_date', 'waste'])
+
+    bar3 = go.Bar(x = val3_table['cur_date'], y = val3_table['waste'], name = 'Waste Management')
+    line3 = go.Scatter(x = val3_table['cur_date'], y = val3_table['waste'], mode = 'lines+markers', name = 'Trend')
+
+    trend3 = go.Figure()
+    trend3.add_trace(bar3)
+    trend3.add_trace(line3)
+
+    trend3.update_layout(title = 'Travel Over The Last Year',
+                        xaxis_title = 'Date',
+                        yaxis_title = 'Energy Consumption')
+
+    st.plotly_chart(trend3)
+
+def travel_bar_chart():
+    connection = connection_creation()
+    cursor = connection.cursor()
+    cursor.execute(f'''SELECT cur_date, travel
+                    FROM calculated
+                    WHERE username = '{st.session_state.username}'
+                    ORDER BY cur_date DESC
+                    LIMIT 12''')
+    values4 = cursor.fetchall()
+    connection.close()
+
+    val4_table = pd.DataFrame(values4, columns=['cur_date', 'travel'])
+
+    bar4 = go.Bar(x = val4_table['cur_date'], y = val4_table['travel'], name = 'Travel')
+    line4 = go.Scatter(x = val4_table['cur_date'], y = val4_table['travel'], mode = 'lines+markers', name = 'Trend')
+
+    trend4 = go.Figure()
+    trend4.add_trace(bar4)
+    trend4.add_trace(line4)
+
+    trend4.update_layout(title = 'Travel Over The Last Year',
+                        xaxis_title = 'Date',
+                        yaxis_title = 'Travel')
+
+    st.plotly_chart(trend4)
+
+def bubble_chart():
+    connection = connection_creation()
+    cursor = connection.cursor()
+    cursor.execute(''' SELECT username, carbon_footprint
+                        FROM calculated
+                        GROUP BY username
+                        ORDER BY cur_date DESC
+                        LIMIT 12''')
+    values5 = cursor.fetchall()
+    connection.close()
+
+    val5_table = pd.DataFrame(values5, columns=['username', 'carbon_footprint'])
+    val5_table_values = val5_table.groupby('username')[['carbon_footprint']].mean()
+
+    trend5 = pe.scatter(val5_table_values, x = 'username', y = 'carbon_footprint', size = 'carbon_footprint',
+                        title = 'Average Yearly Carbon Footprint of All Users',
+                        size_max=60)
+
+    st.plotly_chart(trend5)
+
 
 # def drop_table(table_name):
 #     connection = connection_creation()
