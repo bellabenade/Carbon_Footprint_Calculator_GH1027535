@@ -34,7 +34,8 @@ def carbon_table():
                         waste_recycled INTEGER,
                         travel_km DECIMAL(10, 2) NOT NULL,
                         fuel_efficiency DECIMAL(10, 2) NOT NULL,
-                        cur_date DATE NOT NULL,
+                        month INTEGER NOT NULL,
+                        year INTEGER NOT NULL,
                         FOREIGN KEY(username) REFERENCES user_table(username))''')
     connection.commit()
     connection.close()
@@ -44,13 +45,14 @@ def calculated():
     cursor = connection.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS calculated (
                         username TEXT NOT NULL,
-                        cur_date DATE NOT NULL,
+                        month INTEGER NOT NULL,
+                        year INTEGER NOT NULL,
                         energy DECIMAL(10, 2) NOT NULL,
                         waste DECIMAL(10, 2) NOT NULL,
                         travel DECIMAL(10, 2) NOT NULL,
                         carbon_footprint INTEGER NOT NULL,
-                        PRIMARY KEY (username, cur_date)
-                        UNIQUE (username, cur_date) ON CONFLICT REPLACE
+                        PRIMARY KEY (username, month, year)
+                        UNIQUE (username, month, year) ON CONFLICT REPLACE
                         FOREIGN KEY (username) REFERENCES users(cur_date))''')
     connection.commit()
     connection.close()
@@ -80,24 +82,24 @@ def delete_user(username):
     connection.commit()
     connection.close()
 
-def insert_info(username, electricity, nat_gas, fuel, waste_generated, waste_recycled, travel_km, fuel_efficiency, cur_date):
+def insert_info(username, electricity, nat_gas, fuel, waste_generated, waste_recycled, travel_km, fuel_efficiency, month, year):
     #username will also have to be checked
     connection = connection_creation()
     cursor = connection.cursor()
-    cursor.execute('''SELECT * 
-    FROM carbon 
-    WHERE username = ? AND cur_date = ?''',
-                   (username, cur_date))
+    cursor.execute('''SELECT *
+                            FROM carbon
+                            WHERE username = ? AND month = ? AND year = ?''',
+                   (username, month, year))
     exist = cursor.fetchone()
 
     if exist:
         cursor.execute('''UPDATE carbon
-        SET electricity = ?, nat_gas = ?, fuel = ?, waste_generated = ?, waste_recycled = ?, travel_km = ?, fuel_efficiency = ?
-        WHERE username = ? AND cur_date = ?''', (electricity, nat_gas, fuel, waste_generated, waste_recycled, travel_km, fuel_efficiency, username, cur_date))
+                                SET electricity = ?, nat_gas = ?, fuel = ?, waste_generated = ?, waste_recycled = ?, travel_km = ?, fuel_efficiency = ?
+                                WHERE username = ? AND month = ? AND year = ?''',
+                        (electricity, nat_gas, fuel, waste_generated, waste_recycled, travel_km, fuel_efficiency, username, month, year))
     else:
-        cursor.execute('INSERT INTO carbon VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                       (username, electricity, nat_gas, fuel, waste_generated, waste_recycled, travel_km,
-                        fuel_efficiency, cur_date))
+        cursor.execute('INSERT INTO carbon VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                       (username, electricity, nat_gas, fuel, waste_generated, waste_recycled, travel_km, fuel_efficiency, month, year))
     connection.commit()
     connection.close()
     calculate_values()
@@ -105,18 +107,18 @@ def insert_info(username, electricity, nat_gas, fuel, waste_generated, waste_rec
 def calculate_values():
     connection = connection_creation()
     cursor = connection.cursor()
-    cursor.execute('''SELECT username, cur_date, 
-                        printf("%.2f",electricity * 12 * 0.0005 + nat_gas * 12 * 0.0053 + fuel * 12 * 2.32) AS energy, 
-                        printf("%.2f",waste_generated * 12 * (0.57 - (waste_recycled)/100)) AS waste, 
+    cursor.execute('''SELECT username, month, year,
+                        printf("%.2f",electricity * 12 * 0.0005 + nat_gas * 12 * 0.0053 + fuel * 12 * 2.32) AS energy,
+                        printf("%.2f",waste_generated * 12 * (0.57 - (waste_recycled)/100)) AS waste,
                         printf("%.2f",travel_km * (1.0 / fuel_efficiency) * 2.31) AS travel
                         FROM carbon''')
     result = cursor.fetchall()
 
     for i in result:
-        username, cur_date, energy, waste, travel = i
+        username, month, year, energy, waste, travel = i
         carbon_footprint = int(float(energy) + float(waste) + float(travel))
-        cursor.execute('''INSERT OR REPLACE INTO calculated (username, cur_date, energy, waste, travel, carbon_footprint)
-                            VALUES (?, ?, ?, ?, ?, ?)''', (username, cur_date, energy, waste, travel, carbon_footprint))
+        cursor.execute('''INSERT OR REPLACE INTO calculated (username, month, year, energy, waste, travel, carbon_footprint)
+                            VALUES (?, ?, ?, ?, ?, ?, ?)''', (username, month, year, energy, waste, travel, carbon_footprint))
     connection.commit()
     connection.close()
 
@@ -125,13 +127,13 @@ carbon_table()
 calculated()
 calculate_values()
 
-def herpa_derpa():
+def cf_calculation():
     connection = connection_creation()
     cursor = connection.cursor()
-    cursor.execute(f'''SELECT carbon_footprint 
-                    FROM calculated 
-                    WHERE username = '{st.session_state.username}' 
-                    ORDER BY cur_date DESC
+    cursor.execute(f'''SELECT carbon_footprint
+                    FROM calculated
+                    WHERE username = '{st.session_state.username}'
+                    ORDER BY year DESC, month DESC
                     LIMIT 1''')
     carbon_foot = cursor.fetchone()[0]
     connection.close()
@@ -143,7 +145,7 @@ def pie_chart():
     cursor.execute(f'''SELECT energy, waste, travel
                     FROM calculated
                     WHERE username = '{st.session_state.username}'
-                    ORDER BY cur_date DESC
+                    ORDER BY year DESC, month DESC
                     LIMIT 1''')
     values1 = cursor.fetchall()
     connection.close()
@@ -156,105 +158,135 @@ def pie_chart():
         values = [val1_table_values['energy'], val1_table_values['waste'], val1_table_values['travel']],
         title = 'My consumption this month:')
 
-    st.plotly_chart(pie)
+    return pie
 
-def energy_bar_chart():
+def energy_bar_chart(year):
     connection = connection_creation()
     cursor = connection.cursor()
-    cursor.execute(f'''SELECT cur_date, energy
-                    FROM calculated
-                    WHERE username = '{st.session_state.username}'
-                    ORDER BY cur_date DESC
-                    LIMIT 12''')
+    cursor.execute(f'''SELECT month, energy
+                        FROM calculated
+                        WHERE username = '{st.session_state.username}' AND year = '{year}'
+                        ORDER BY month DESC
+                        LIMIT 12''')
+
     values2 = cursor.fetchall()
     connection.close()
 
-    val2_table = pd.DataFrame(values2, columns=['cur_date', 'energy'])
+    val2_table = pd.DataFrame(values2, columns=['month', 'energy'])
 
-    bar2 = go.Bar(x = val2_table['cur_date'], y = val2_table['energy'], name = 'Energy Consumption')
-    line2 = go.Scatter(x = val2_table['cur_date'], y = val2_table['energy'], mode = 'lines+markers', name = 'Trend')
+    bar2 = go.Bar(x=val2_table['month'], y=val2_table['energy'], name='Energy Consumption')
+    line2 = go.Scatter(x=val2_table['month'], y=val2_table['energy'], mode='lines+markers', name='Trend')
 
     trend2 = go.Figure()
     trend2.add_trace(bar2)
     trend2.add_trace(line2)
 
-    trend2.update_layout(title = 'Energy Consumption Over The Last Year',
-                        xaxis_title = 'Date',
-                        yaxis_title = 'Energy Consumption')
+    trend2.update_layout(title='Energy Consumption Over The Last Year',
+                         xaxis_title='Month',
+                         yaxis_title='Energy Consumption')
 
-    st.plotly_chart(trend2)
+    return trend2
 
-def waste_bar_chart():
+
+def waste_bar_chart(year):
     connection = connection_creation()
     cursor = connection.cursor()
-    cursor.execute(f'''SELECT cur_date, waste
+
+
+    cursor.execute(f'''SELECT month, waste
                     FROM calculated
-                    WHERE username = '{st.session_state.username}'
-                    ORDER BY cur_date DESC
+                    WHERE username = '{st.session_state.username}' AND year = '{year}'
+                    ORDER BY month DESC
                     LIMIT 12''')
     values3 = cursor.fetchall()
     connection.close()
 
-    val3_table = pd.DataFrame(values3, columns=['cur_date', 'waste'])
+    val3_table = pd.DataFrame(values3, columns=['month', 'waste'])
 
-    bar3 = go.Bar(x = val3_table['cur_date'], y = val3_table['waste'], name = 'Waste Management')
-    line3 = go.Scatter(x = val3_table['cur_date'], y = val3_table['waste'], mode = 'lines+markers', name = 'Trend')
+    bar3 = go.Bar(x = val3_table['month'], y = val3_table['waste'], name = 'Waste Generation')
+    line3 = go.Scatter(x = val3_table['month'], y = val3_table['waste'], mode = 'lines+markers', name = 'Trend')
 
     trend3 = go.Figure()
     trend3.add_trace(bar3)
     trend3.add_trace(line3)
 
-    trend3.update_layout(title = 'Travel Over The Last Year',
-                        xaxis_title = 'Date',
-                        yaxis_title = 'Energy Consumption')
+    trend3.update_layout(title = 'Waste Generation Over The Last Year',
+                        xaxis_title = 'Month',
+                        yaxis_title = 'Waste Generation')
 
-    st.plotly_chart(trend3)
+    return trend3
 
-def travel_bar_chart():
+def travel_bar_chart(year):
     connection = connection_creation()
     cursor = connection.cursor()
-    cursor.execute(f'''SELECT cur_date, travel
+    cursor.execute(f'''SELECT month, travel
                     FROM calculated
-                    WHERE username = '{st.session_state.username}'
-                    ORDER BY cur_date DESC
+                    WHERE username = '{st.session_state.username}' AND year = '{year}'
+                    ORDER BY month DESC
                     LIMIT 12''')
     values4 = cursor.fetchall()
     connection.close()
 
-    val4_table = pd.DataFrame(values4, columns=['cur_date', 'travel'])
+    val4_table = pd.DataFrame(values4, columns=['month', 'travel'])
 
-    bar4 = go.Bar(x = val4_table['cur_date'], y = val4_table['travel'], name = 'Travel')
-    line4 = go.Scatter(x = val4_table['cur_date'], y = val4_table['travel'], mode = 'lines+markers', name = 'Trend')
+    bar4 = go.Bar(x = val4_table['month'], y = val4_table['travel'], name = 'Travel')
+    line4 = go.Scatter(x = val4_table['month'], y = val4_table['travel'], mode = 'lines+markers', name = 'Trend')
 
     trend4 = go.Figure()
     trend4.add_trace(bar4)
     trend4.add_trace(line4)
 
     trend4.update_layout(title = 'Travel Over The Last Year',
-                        xaxis_title = 'Date',
+                        xaxis_title = 'Month',
                         yaxis_title = 'Travel')
 
-    st.plotly_chart(trend4)
+    return trend4
 
-def bubble_chart():
+# def bubble_chart():
+#     connection = connection_creation()
+#     cursor = connection.cursor()
+#     cursor.execute(''' SELECT username, carbon_footprint
+#                         FROM calculated
+#                         GROUP BY username
+#                         ORDER BY cur_date DESC
+#                         LIMIT 12''')
+#     values5 = cursor.fetchall()
+#     connection.close()
+#
+#     val5_table = pd.DataFrame(values5, columns=['username', 'carbon_footprint'])
+#     val5_table_values = val5_table.groupby('username')[['carbon_footprint']].mean()
+#
+#     trend5 = pe.scatter(val5_table_values, x = ['username'], y = ['carbon_footprint'], size = ['carbon_footprint'],
+#                         title = 'Average Yearly Carbon Footprint of All Users',
+#                         size_max=60)
+#
+#     st.plotly_chart(trend5)
+
+def carbon_footprint_bar_chart(year):
     connection = connection_creation()
     cursor = connection.cursor()
-    cursor.execute(''' SELECT username, carbon_footprint
+    cursor.execute(f''' SELECT username, carbon_footprint
                         FROM calculated
-                        GROUP BY username
-                        ORDER BY cur_date DESC
-                        LIMIT 12''')
+                        WHERE year = '{year}'
+                        ''')
     values5 = cursor.fetchall()
     connection.close()
 
     val5_table = pd.DataFrame(values5, columns=['username', 'carbon_footprint'])
-    val5_table_values = val5_table.groupby('username')[['carbon_footprint']].mean()
+    val5_table_values = val5_table.groupby('username')[['carbon_footprint']].mean().reset_index()
 
-    trend5 = pe.scatter(val5_table_values, x = 'username', y = 'carbon_footprint', size = 'carbon_footprint',
-                        title = 'Average Yearly Carbon Footprint of All Users',
-                        size_max=60)
+    bar5 = go.Bar(x=val5_table_values['username'], y=val5_table_values['carbon_footprint'], name='Carbon Footprint of Users')
+    line5 = go.Scatter(x=val5_table_values['username'], y=val5_table_values['carbon_footprint'], mode='lines+markers', name='Trend')
 
-    st.plotly_chart(trend5)
+    trend5 = go.Figure()
+    trend5.add_trace(bar5)
+    trend5.add_trace(line5)
+
+    trend5.update_layout(title='Average Carbon Footprint of Users Over the Past Year',
+                         xaxis_title='Username',
+                         yaxis_title='Carbon Footprint')
+
+    return trend5
 
 
 # def drop_table(table_name):
@@ -264,7 +296,7 @@ def bubble_chart():
 #     connection.commit()
 #     connection.close()
 #
-# drop_table('calculated')
+# drop_table('carbon')
 
 # Functions to display user and carbon table with saved entries
 def fetch_all_entries(table_name):

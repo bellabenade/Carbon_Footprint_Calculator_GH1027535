@@ -5,6 +5,8 @@
 import streamlit as st
 from database import get_user, add_user, delete_user
 
+
+
 # validate users credentials:
 def user_validation(username, password):
     user = get_user(username)
@@ -40,6 +42,7 @@ def login():
     if st.button('LOGIN'):
         if user_validation(username, password):
             st.session_state.logged_in = True
+            st.session_state.initialize = False
             st.session_state.username = username
             print('You have successfully logged in!')
         else:
@@ -57,3 +60,4 @@ def delete():
             st.success('Your account has been deleted!')
         else:
             st.error('Username or password is invalid.')
+

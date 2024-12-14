@@ -4,6 +4,16 @@ from database import insert_info
 from carbon_footprint_report import carbon_calculator
 
 
+def initialize():
+    st.title('Carbon Footprint Calculator')
+
+    if 'initialize' not in st.session_state:
+        st.session_state.initialize = True
+    if 'logged_in' not in st.session_state:
+        st.session_state.logged_in = False
+    if 'username' not in st.session_state:
+        st.session_state.username = ''
+
 def login_page():
     menu = ['Please choose an action!', 'Login', 'Signup', 'Delete Profile']
     choice = st.selectbox('Please log in to continue:', menu)
@@ -31,6 +41,8 @@ def profile():
         carbon_calculator()
     if st.button('LOG OUT'):
         st.session_state.logged_in = False
+        st.session_state.initialize = True
+        st.session_state.username = ''
 
 def add_info():
     st.subheader('Please complete the following form to calculate your carbon footprint!')
@@ -50,10 +62,11 @@ def add_info():
         travel_km = st.number_input('How many kilometers do your employees travel per year for business purposes?', format="%.2f")
         fuel_efficiency = st.number_input('What is the average fuel efficiency of the vehicle used for business travel in liters per 100 kilometers?', format="%.2f")
 
-        cur_date = st.date_input('Select the date at which you took all these measurements:')
+        month = st.selectbox('Month', options= ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'])
+        year = st.selectbox('Year', options= list(range(2020, 2050)))
 
         submit = st.form_submit_button('SUBMIT')
 
     if submit:
-        insert_info(st.session_state.username, electricity, nat_gas, fuel, waste_generated, waste_recycled, travel_km, fuel_efficiency, cur_date)
+        insert_info(st.session_state.username, electricity, nat_gas, fuel, waste_generated, waste_recycled, travel_km, fuel_efficiency, month, year)
         st.text('Your data has been saved!')
