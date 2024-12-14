@@ -51,10 +51,12 @@ def carbon_calculator():
             cf_bar = carbon_footprint_bar_chart(year)
             st.plotly_chart(cf_bar)
         elif selection == 'Download Report for This Year':
+            print('1')
             pdf_data = create_pdf()
-            if st.download_button('DOWNLOAD CARBON FOOTPRINT REPORT'):
-                st.text('well done!')
+            print(pdf_data)
+            st.download_button('DOWNLOAD CARBON FOOTPRINT REPORT',
+                                  data = pdf_data,
+                                  file_name = 'carbon_footprint_report.pdf',
+                                  mime = 'application/pdf')
     else:
         st.text('You do not have any data for the specified year!')
-
-
