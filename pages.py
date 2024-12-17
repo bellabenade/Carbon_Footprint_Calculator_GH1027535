@@ -1,6 +1,6 @@
 import streamlit as st
 from User_Login import login, signup, delete
-from database import insert_info
+from database import insert_info, calculate_values
 from carbon_footprint_report import carbon_calculator
 
 
@@ -69,4 +69,5 @@ def add_info():
 
     if submit:
         insert_info(st.session_state.username, electricity, nat_gas, fuel, waste_generated, waste_recycled, travel_km, fuel_efficiency, month, year)
+        calculate_values()
         st.text('Your data has been saved!')

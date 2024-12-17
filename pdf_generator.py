@@ -2,7 +2,7 @@
 import streamlit as st
 from fpdf import FPDF
 import plotly.io as pio
-from database import cf_calculation, energy_bar_chart, waste_bar_chart, travel_bar_chart, carbon_footprint_bar_chart, \
+from database import cf_calculation, energy_bar_chart, waste_bar_chart, travel_bar_chart, \
     pie_chart
 
 

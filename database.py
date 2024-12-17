@@ -18,7 +18,8 @@ def user_table():
     cursor = connection.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS users (
                         username TEXT UNIQUE PRIMARY KEY,
-                        password TEXT NOT NULL)''')
+                        password TEXT NOT NULL,
+                        UNIQUE (username, password) ON CONFLICT IGNORE)''')
     connection.commit()
     connection.close()
 
@@ -36,6 +37,7 @@ def carbon_table():
                         fuel_efficiency DECIMAL(10, 2) NOT NULL,
                         month INTEGER NOT NULL,
                         year INTEGER NOT NULL,
+                        UNIQUE (username, month, year) ON CONFLICT REPLACE
                         FOREIGN KEY(username) REFERENCES user_table(username))''')
     connection.commit()
     connection.close()
@@ -93,10 +95,14 @@ def insert_info(username, electricity, nat_gas, fuel, waste_generated, waste_rec
     exist = cursor.fetchone()
 
     if exist:
-        cursor.execute('''UPDATE carbon
-                                SET electricity = ?, nat_gas = ?, fuel = ?, waste_generated = ?, waste_recycled = ?, travel_km = ?, fuel_efficiency = ?
-                                WHERE username = ? AND month = ? AND year = ?''',
-                        (electricity, nat_gas, fuel, waste_generated, waste_recycled, travel_km, fuel_efficiency, username, month, year))
+        st.warning('EXISTING ENTRY FOUND!')
+        if st.button('REPLACE'):
+            cursor.execute('''UPDATE carbon
+                            SET electricity = ?, nat_gas = ?, fuel = ?, waste_generated = ?, waste_recycled = ?, travel_km = ?, fuel_efficiency = ?
+                            WHERE username = ? AND month = ? AND year = ?''',
+                    (electricity, nat_gas, fuel, waste_generated, waste_recycled, travel_km, fuel_efficiency, username, month, year))
+        elif st.button('DISCARD'):
+            st.text('The entry was discarded')
     else:
         cursor.execute('INSERT INTO carbon VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                        (username, electricity, nat_gas, fuel, waste_generated, waste_recycled, travel_km, fuel_efficiency, month, year))
@@ -121,11 +127,6 @@ def calculate_values():
                             VALUES (?, ?, ?, ?, ?, ?, ?)''', (username, month, year, energy, waste, travel, carbon_footprint))
     connection.commit()
     connection.close()
-
-user_table()
-carbon_table()
-calculated()
-calculate_values()
 
 def cf_calculation():
     connection = connection_creation()
@@ -242,87 +243,41 @@ def travel_bar_chart(year):
 
     return trend4
 
-# def bubble_chart():
-#     connection = connection_creation()
-#     cursor = connection.cursor()
-#     cursor.execute(''' SELECT username, carbon_footprint
-#                         FROM calculated
-#                         GROUP BY username
-#                         ORDER BY cur_date DESC
-#                         LIMIT 12''')
-#     values5 = cursor.fetchall()
-#     connection.close()
-#
-#     val5_table = pd.DataFrame(values5, columns=['username', 'carbon_footprint'])
-#     val5_table_values = val5_table.groupby('username')[['carbon_footprint']].mean()
-#
-#     trend5 = pe.scatter(val5_table_values, x = ['username'], y = ['carbon_footprint'], size = ['carbon_footprint'],
-#                         title = 'Average Yearly Carbon Footprint of All Users',
-#                         size_max=60)
-#
-#     st.plotly_chart(trend5)
-
-def carbon_footprint_bar_chart(year):
+def bubble_chart(year):
     connection = connection_creation()
     cursor = connection.cursor()
     cursor.execute(f''' SELECT username, carbon_footprint
                         FROM calculated
                         WHERE year = '{year}'
-                        ''')
+                        ORDER BY username''')
     values5 = cursor.fetchall()
     connection.close()
 
     val5_table = pd.DataFrame(values5, columns=['username', 'carbon_footprint'])
-    val5_table_values = val5_table.groupby('username')[['carbon_footprint']].mean().reset_index()
+    val5_table_values = val5_table.groupby('username')[['carbon_footprint']].mean().round().astype(int).reset_index()
+    val5_table_values['custom_label'] = val5_table_values.apply(
+        lambda row: f"{row['username']}<br>{row['carbon_footprint']} kg CO2", axis=1)
 
-    bar5 = go.Bar(x=val5_table_values['username'], y=val5_table_values['carbon_footprint'], name='Carbon Footprint of Users')
-    line5 = go.Scatter(x=val5_table_values['username'], y=val5_table_values['carbon_footprint'], mode='lines+markers', name='Trend')
+    trend5 = pe.scatter(val5_table_values, x = 'username', y = 'carbon_footprint', size = 'carbon_footprint', color = 'username',
+                        title = 'Average Yearly Carbon Footprint of All Users', size_max=60, text = 'custom_label')
 
-    trend5 = go.Figure()
-    trend5.add_trace(bar5)
-    trend5.add_trace(line5)
+    trend5.update_xaxes(showticklabels=False, title_text = '', showgrid = False)
+    trend5.update_yaxes(showticklabels=False, title_text = '', showgrid = False)
 
-    trend5.update_layout(title='Average Carbon Footprint of Users Over the Past Year',
-                         xaxis_title='Username',
-                         yaxis_title='Carbon Footprint')
 
     return trend5
 
-
-# def drop_table(table_name):
-#     connection = connection_creation()
-#     cursor = connection.cursor()
-#     cursor.execute(f'DROP TABLE IF EXISTS {table_name}')
-#     connection.commit()
-#     connection.close()
-#
-# drop_table('carbon')
-
-# Functions to display user and carbon table with saved entries
-def fetch_all_entries(table_name):
+def recommendations(year):
     connection = connection_creation()
     cursor = connection.cursor()
-    cursor.execute(f'SELECT * FROM {table_name}')
-    entries = cursor.fetchall()
+    cursor.execute(f'''SELECT energy, waste, travel, carbon_footprint, month
+                        FROM calculated
+                        WHERE username = '{st.session_state.username}' AND year = {year}
+                        ORDER BY month DESC''')
+    monthly_data = cursor.fetchall()
     connection.close()
-    return entries
 
-def list_tables():
-    connection = connection_creation()
-    cursor = connection.cursor()
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-    tables = cursor.fetchall()
-    connection.close()
-    return tables
+    monthly_data_df = pd.DataFrame(monthly_data, columns= ['month', 'energy', 'waste', 'travel', 'carbon_footprint'])
 
-tables = list_tables()
-print("Tables in the database:")
-for table in tables:
-    print(table[0])
-
-for table in tables:
-    print(f"\nEntries in table '{table[0]}':")
-    entries = fetch_all_entries(table[0])
-    for entry in entries:
-        print(entry)
+    return monthly_data_df
 

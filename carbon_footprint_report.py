@@ -3,7 +3,7 @@
 import streamlit as st
 from database import pie_chart, energy_bar_chart, \
     connection_creation, waste_bar_chart, \
-    travel_bar_chart, carbon_footprint_bar_chart, cf_calculation
+    travel_bar_chart, bubble_chart, cf_calculation, recommendations
 from pdf_generator import create_pdf
 
 
@@ -23,13 +23,13 @@ def carbon_calculator():
     pie_ch = pie_chart()
     st.plotly_chart(pie_ch)
 
-    year = st.selectbox('Enter the year of which you want to see results: ', options=list(range(2020, 2050)))
+    displayed_year = st.selectbox('Enter the year of which you want to see results: ', options=list(range(2020, 2050)))
 
     connection = connection_creation()
     cursor = connection.cursor()
     cursor.execute(f'''SELECT *
                             FROM carbon
-                            WHERE year = {year}''')
+                            WHERE year = {displayed_year}''')
     exist = cursor.fetchall()
     connection.close()
 
@@ -37,26 +37,28 @@ def carbon_calculator():
         selection = st.selectbox('What would you like to see?', options = ['Recommendations', 'Energy Consumption', 'Waste Management', 'Fuel Consumption', 'How I compare to other companies', 'Download Report for This Year'])
 
         if selection == 'Recommendations':
-            pass
+            rec = recommendations(displayed_year)
+            st.table(rec)
         elif selection == 'Energy Consumption':
-            energy_bar = energy_bar_chart(year)
+            energy_bar = energy_bar_chart(displayed_year)
             st.plotly_chart(energy_bar)
         elif selection == 'Waste Management':
-            waste_bar = waste_bar_chart(year)
+            waste_bar = waste_bar_chart(displayed_year)
             st.plotly_chart(waste_bar)
         elif selection == 'Fuel Consumption':
-            travel_bar = travel_bar_chart(year)
+            travel_bar = travel_bar_chart(displayed_year)
             st.plotly_chart(travel_bar)
-        elif selection == 'How I Compare to other companies':
-            cf_bar = carbon_footprint_bar_chart(year)
-            st.plotly_chart(cf_bar)
+        elif selection == 'How I compare to other companies':
+            cf_bubble = bubble_chart(displayed_year)
+            st.plotly_chart(cf_bubble)
         elif selection == 'Download Report for This Year':
-            print('1')
-            pdf_data = create_pdf()
-            print(pdf_data)
-            st.download_button('DOWNLOAD CARBON FOOTPRINT REPORT',
-                                  data = pdf_data,
-                                  file_name = 'carbon_footprint_report.pdf',
-                                  mime = 'application/pdf')
+            pass
+            # print('1')
+            # pdf_data = create_pdf()
+            # print(pdf_data)
+            # st.download_button('DOWNLOAD CARBON FOOTPRINT REPORT',
+            #                       data = pdf_data,
+            #                       file_name = 'carbon_footprint_report.pdf',
+            #                       mime = 'application/pdf')
     else:
         st.text('You do not have any data for the specified year!')
