@@ -267,17 +267,3 @@ def bubble_chart(year):
 
     return trend5
 
-def recommendations(year):
-    connection = connection_creation()
-    cursor = connection.cursor()
-    cursor.execute(f'''SELECT energy, waste, travel, carbon_footprint, month
-                        FROM calculated
-                        WHERE username = '{st.session_state.username}' AND year = {year}
-                        ORDER BY month DESC''')
-    monthly_data = cursor.fetchall()
-    connection.close()
-
-    monthly_data_df = pd.DataFrame(monthly_data, columns= ['month', 'energy', 'waste', 'travel', 'carbon_footprint'])
-
-    return monthly_data_df
-

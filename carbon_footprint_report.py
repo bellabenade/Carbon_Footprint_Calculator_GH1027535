@@ -3,8 +3,9 @@
 import streamlit as st
 from database import pie_chart, energy_bar_chart, \
     connection_creation, waste_bar_chart, \
-    travel_bar_chart, bubble_chart, cf_calculation, recommendations
+    travel_bar_chart, bubble_chart, cf_calculation
 from pdf_generator import create_pdf
+from recommendations import recommendations
 
 
 def carbon_calculator():
@@ -37,8 +38,16 @@ def carbon_calculator():
         selection = st.selectbox('What would you like to see?', options = ['Recommendations', 'Energy Consumption', 'Waste Management', 'Fuel Consumption', 'How I compare to other companies', 'Download Report for This Year'])
 
         if selection == 'Recommendations':
-            rec = recommendations(displayed_year)
-            st.table(rec)
+            monthly_df, diff_html, total_change = recommendations(displayed_year)
+            st.subheader('Your data for the past 12 months:')
+            st.table(monthly_df)
+            st.subheader('Change in monthly consumption:')
+            st.markdown(diff_html, unsafe_allow_html = True)
+            st.subheader('Your total change in consumption over the last year:')
+            st.markdown(total_change, unsafe_allow_html = True)
+            st.subheader('You can consider the following recommendations:')
+
+
         elif selection == 'Energy Consumption':
             energy_bar = energy_bar_chart(displayed_year)
             st.plotly_chart(energy_bar)
