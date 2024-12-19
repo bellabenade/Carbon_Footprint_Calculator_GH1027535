@@ -85,7 +85,7 @@ def delete_user(username):
     connection.close()
 
 def insert_info(username, electricity, nat_gas, fuel, waste_generated, waste_recycled, travel_km, fuel_efficiency, month, year):
-    #username will also have to be checked
+
     connection = connection_creation()
     cursor = connection.cursor()
     cursor.execute('''SELECT *
@@ -95,14 +95,11 @@ def insert_info(username, electricity, nat_gas, fuel, waste_generated, waste_rec
     exist = cursor.fetchone()
 
     if exist:
-        st.warning('EXISTING ENTRY FOUND!')
-        if st.button('REPLACE'):
-            cursor.execute('''UPDATE carbon
-                            SET electricity = ?, nat_gas = ?, fuel = ?, waste_generated = ?, waste_recycled = ?, travel_km = ?, fuel_efficiency = ?
-                            WHERE username = ? AND month = ? AND year = ?''',
-                    (electricity, nat_gas, fuel, waste_generated, waste_recycled, travel_km, fuel_efficiency, username, month, year))
-        elif st.button('DISCARD'):
-            st.text('The entry was discarded')
+        cursor.execute('''UPDATE carbon
+                        SET electricity = ?, nat_gas = ?, fuel = ?, waste_generated = ?, waste_recycled = ?, travel_km = ?, fuel_efficiency = ?
+                        WHERE username = ? AND month = ? AND year = ?''',
+                (electricity, nat_gas, fuel, waste_generated, waste_recycled, travel_km, fuel_efficiency, username, month, year))
+        connection.commit()
     else:
         cursor.execute('INSERT INTO carbon VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                        (username, electricity, nat_gas, fuel, waste_generated, waste_recycled, travel_km, fuel_efficiency, month, year))

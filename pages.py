@@ -14,6 +14,7 @@ def initialize():
     if 'username' not in st.session_state:
         st.session_state.username = ''
 
+
 def login_page():
     menu = ['Please choose an action!', 'Login', 'Signup', 'Delete Profile']
     choice = st.selectbox('Please log in to continue:', menu)
@@ -45,6 +46,7 @@ def profile():
         st.session_state.username = ''
 
 def add_info():
+    submit = False
     st.subheader('Please complete the following form to calculate your carbon footprint!')
     with st.form('Add_Info'):
         st.subheader('Energy Usage:')
@@ -65,9 +67,11 @@ def add_info():
         month = st.selectbox('Month', options= ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'])
         year = st.selectbox('Year', options= list(range(2020, 2050)))
 
-        submit = st.form_submit_button('SUBMIT')
+        if st.form_submit_button('SUBMIT'):
+            submit = True
 
     if submit:
         insert_info(st.session_state.username, electricity, nat_gas, fuel, waste_generated, waste_recycled, travel_km, fuel_efficiency, month, year)
         calculate_values()
         st.text('Your data has been saved!')
+        submit = False
