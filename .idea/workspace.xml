@@ -6,11 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="34f90a87-0e03-4d26-b776-df90307c96a0" name="Changes" comment="Database creation">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/User_Login.py" beforeDir="false" afterPath="$PROJECT_DIR$/User_Login.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/carbon_footprint_calculator.py" beforeDir="false" afterPath="$PROJECT_DIR$/carbon_footprint_calculator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/carbon_footprint_report.py" beforeDir="false" afterPath="$PROJECT_DIR$/carbon_footprint_report.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/company_clients.db" beforeDir="false" afterPath="$PROJECT_DIR$/company_clients.db" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pages.py" beforeDir="false" afterPath="$PROJECT_DIR$/pages.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_insert.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_insert.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pdf_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/pdf_generator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recommendations.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_tables.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

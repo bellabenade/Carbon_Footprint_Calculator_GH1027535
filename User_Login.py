@@ -1,5 +1,3 @@
-# gabriella_benade
-# 1234
 # pip freeze > requirements.txt
 
 import streamlit as st

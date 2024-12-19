@@ -8,3 +8,4 @@ if st.session_state.initialize:
     login_page()
 elif st.session_state.logged_in:
     profile()
+

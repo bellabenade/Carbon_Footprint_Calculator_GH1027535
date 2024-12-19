@@ -1,13 +1,10 @@
 #https://www.bing.com/videos/riverview/relatedvideo?q=how+to+create+graphs+in+streamlit&mid=30F5D319CA080E04D2E930F5D319CA080E04D2E9&FORM=VIRE
-import io
-import os
-
 import streamlit as st
 from database import pie_chart, energy_bar_chart, \
     connection_creation, waste_bar_chart, \
     travel_bar_chart, bubble_chart, cf_calculation
-from pdf_generator import gen_pdf, pdf_pie_chart, create_pdf
-from recommendations import data_tables
+from pdf_generator import create_pdf
+from data_tables import data_tables
 
 
 def carbon_calculator():
@@ -52,6 +49,7 @@ def carbon_calculator():
             st.markdown(total_change, unsafe_allow_html = True)
 
             st.subheader('Recommendations:')
+
             if energy_con > 0:
                 st.subheader('We see there has been an increase in your energy consumption. Maybe keep the following recommendations in mind:')
                 st.markdown("""
@@ -103,11 +101,9 @@ def carbon_calculator():
             #     file_name="plotly_express_pie_chart_report.pdf",
             #     mime="application/pdf"
             # )
-            st.title("PDF Generation Example")
 
             if st.button("Generate PDF"):
-                pie_chart_path = pdf_pie_chart()
-                pdf = create_pdf(pie_chart_path)
+                pdf = create_pdf(displayed_year)
                 st.download_button(
                         label="Download PDF",
                         data=pdf,

@@ -21,7 +21,7 @@ def insert_data(username, electricity, nat_gas, fuel, waste_generated, waste_rec
 # carbon_table()
 # calculated()
 #
-# # #Insert users in table
+#  #Insert users in table
 # insert_users('Company_A', '3456')
 # insert_users('Company_B', '4567')
 # insert_users('Company_C', '5678')
@@ -39,8 +39,8 @@ def insert_data(username, electricity, nat_gas, fuel, waste_generated, waste_rec
 # insert_data('Company_C', 280, 230, 320, 350, 30, 3000, 11, 3, 2024)
 # insert_data('Company_C', 260, 190, 300, 380, 30, 3000, 11, 4, 2024)
 #
-# # # Insert calculated values into table calculated
-calculate_values()
+# # Insert calculated values into table calculated
+# calculate_values()
 
 # def drop_table(table_name):
 #     connection = connection_creation()
@@ -51,7 +51,6 @@ calculate_values()
 #
 # drop_table('calculated')
 
-# Functions to display user and carbon table with saved entries
 def fetch_all_entries(table_name):
     connection = connection_creation()
     cursor = connection.cursor()
@@ -69,12 +68,12 @@ def list_tables():
     return tables
 
 tables = list_tables()
-print("Tables in the database:")
+print("Database Tables:")
 for table in tables:
     print(table[0])
 
 for table in tables:
-    print(f"\nEntries in table '{table[0]}':")
+    print(f"\nTable Entries:'{table[0]}':")
     entries = fetch_all_entries(table[0])
     for entry in entries:
         print(entry)
